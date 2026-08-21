@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TreeCare</title>
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --ink: #1f2420;
+    --muted: #5b6259;
+    --line: #e2ddd0;
+    --green: #2f6b3f;
+    --green-dark: #1e4a2b;
+    --coral: #c2603a;
+    --blue: #2c5f8a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  header {
+    padding: 72px 24px 56px;
+    text-align: center;
+    background: linear-gradient(180deg, #eef3ea 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 {
+    font-size: 2.4rem;
+    margin: 0 0 12px;
+    color: var(--green-dark);
+    letter-spacing: -0.01em;
+  }
+  header p.tagline {
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .badges {
+    margin-top: 24px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 0.8rem;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+  section {
+    margin-bottom: 56px;
+  }
+  h2 {
+    font-size: 1.5rem;
+    color: var(--green-dark);
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  .lead {
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 680px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card h3 {
+    margin: 0 0 10px;
+    font-size: 1.1rem;
+  }
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.96rem;
+  }
+  .card.sensor h3 { color: var(--coral); }
+  .card.aerial h3 { color: var(--blue); }
+  ul.check {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  ul.check li {
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  ul.check li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.88rem;
+    color: var(--ink);
+  }
+  .diagram-wrap {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+  .note {
+    background: #fbf3e3;
+    border: 1px solid #ecd9ad;
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 0.92rem;
+    color: #5a4a1f;
+  }
+  footer {
+    text-align: center;
+    padding: 32px 24px 56px;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  a { color: var(--green); }
+  code {
+    background: #eef1ec;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+</style>
+
+<style>
+  .code-file {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    background: var(--card);
+    overflow: hidden;
+  }
+  .code-file summary {
+    cursor: pointer;
+    padding: 12px 16px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.88rem;
+    list-style: none;
+    background: #f1efe8;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .code-file summary::-webkit-details-marker { display: none; }
+  .code-file summary::before { content: "\25B8"; color: #2f6b3f; font-family: sans-serif; }
+  .code-file[open] summary::before { content: "\25BE"; }
+  .code-file summary .fname { font-weight: 700; color: #1f2420; }
+  .code-file summary .flabel { color: #5b6259; font-family: -apple-system, sans-serif; font-size: 0.82rem; }
+  .code-file pre {
+    margin: 0;
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+  .code-file pre code {
+    background: none;
+    padding: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .subhead {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 28px 0 14px;
+    color: #1e4a2b;
+  }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+<body>
+
+<header>
+  <h1>TreeCare</h1>
+  <p class="tagline">An iPhone app and DIY Arduino sensor that help municipalities find and map dead or dying trees before they become a falling hazard.</p>
+  <div class="badges">
+    <span class="badge">SwiftUI + SwiftData</span>
+    <span class="badge">ESP32 + Bluetooth LE</span>
+    <span class="badge">On-device Vision</span>
+    <span class="badge">Prototype</span>
+  </div>
+</header>
+
+<main>
+
+  <section>
+    <h2>What it does</h2>
+    <p class="lead">
+      TreeCare gives a municipal field crew two independent ways to flag a dead tree,
+      both of which log the tree's GPS coordinates to a shared, on-device map. The goal is
+      to make tree-risk surveys faster and less manual than walking a neighborhood with a
+      clipboard.
+    </p>
+  </section>
+
+  <section>
+    <h2>Two ways to detect a dead tree</h2>
+    <div class="grid">
+      <div class="card sensor">
+        <h3>Sensor mode</h3>
+        <p>
+          An ESP32 microcontroller drives a pair of handheld piezo probes pressed against
+          opposite sides of a trunk. It times how long a sonic pulse takes to cross from one
+          side to the other &mdash; a simplified version of professional sonic tomography.
+          Healthy wood transmits sound faster than decayed or hollow wood. The ESP32 talks to
+          the app over Bluetooth Low Energy and the reading is logged instantly with GPS
+          coordinates.
+        </p>
+      </div>
+      <div class="card aerial">
+        <h3>Aerial mode</h3>
+        <p>
+          Point the phone's camera &mdash; handheld, or mounted on a drone the municipality
+          already owns &mdash; at tree canopy and leave it running. The app continuously
+          analyzes the live feed on-device: a scene classifier confirms it's actually looking
+          at vegetation, subject segmentation isolates the tree from its background, and a
+          color/saturation/texture model scores the canopy for signs of dieback. A sustained
+          "dead-looking" detection logs the tree automatically &mdash; no photo-taking required.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How the pieces connect</h2>
+    <ul class="check">
+      <li>ESP32 pulses a piezo transducer through the trunk and times the response on a second piezo</li>
+      <li>Result is classified dead / alive / uncertain on the microcontroller itself</li>
+      <li>ESP32 broadcasts the reading over a custom Bluetooth LE GATT service</li>
+      <li>iPhone app connects as a BLE central, requests readings, and tags them with CoreLocation coordinates</li>
+      <li>Aerial scans run entirely on-device using Apple's Vision framework &mdash; no cloud, no external API</li>
+      <li>Every logged tree lands in one shared map and list view, regardless of which method found it</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Built with</h2>
+    <div class="stack">
+      <span class="chip">Swift &amp; SwiftUI</span>
+      <span class="chip">SwiftData</span>
+      <span class="chip">CoreBluetooth</span>
+      <span class="chip">CoreLocation</span>
+      <span class="chip">AVFoundation</span>
+      <span class="chip">Vision framework</span>
+      <span class="chip">ESP32 / Arduino C++</span>
+      <span class="chip">Bluetooth LE (GATT)</span>
+      <span class="chip">XcodeGen</span>
+    </div>
+  </section>
+
+
+  <section id="source">
+    <h2>Source code</h2>
+    <p class="lead">Full source for both halves of the project, straight from the repo. Click a file to expand it.</p>
+
+    <div class="subhead">iOS app (Swift)</div>
+      <details class="code-file">
+        <summary><span class="fname">DeadTreeLoggerApp.swift</span><span class="flabel">App entry point</span></summary>
+        <pre><code class="language-swift">import SwiftUI
+import SwiftData
+
+@main
+struct DeadTreeLoggerApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+        .modelContainer(for: TreeRecord.self)
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">TreeRecord.swift</span><span class="flabel">Data model</span></summary>
+        <pre><code class="language-swift">import Foundation
+import SwiftData
+import CoreLocation
+
+/// How a tree entry was logged.
+enum TreeSource: String, Codable {
+    case sensor   // ESP32 trunk sonic sensor via Bluetooth
+    case aerial   // phone/drone camera + on-device canopy analysis
+    case manual   // manually entered, no automated reading
+}
+
+/// The health call for a logged tree. Both the sensor and aerial modes log
+/// `.dead` directly - there&#x27;s no separate &quot;unconfirmed&quot; tier.
+enum TreeHealthStatus: String, Codable {
+    case dead
+    case alive
+    case uncertain
+
+    /// Maps the ESP32 sensor&#x27;s 0/1/2 status byte to a case.
+    init(sensorStatus: Int) {
+        switch sensorStatus {
+        case 1: self = .dead
+        case 0: self = .alive
+        default: self = .uncertain
+        }
+    }
+
+    /// Human-readable label (kept as a small convenience over
+    /// `rawValue.capitalized`).
+    var displayName: String {
+        switch self {
+        case .dead: return &quot;Dead&quot;
+        case .alive: return &quot;Alive&quot;
+        case .uncertain: return &quot;Uncertain&quot;
+        }
+    }
+}
+
+/// One logged tree observation. This is the local (on-device) database -
+/// SwiftData persists these to a SQLite store in the app&#x27;s sandbox.
+@Model
+final class TreeRecord {
+    var id: UUID
+    var timestamp: Date
+    var latitude: Double
+    var longitude: Double
+    var source: TreeSource
+    var status: TreeHealthStatus
+
+    /// Sonic pulse velocity in m/s, only set for .sensor readings.
+    var sonicVelocity: Double?
+    /// Classifier confidence 0-1, only set for .aerial readings.
+    var confidence: Double?
+    var notes: String?
+    /// Filename of a saved JPEG in the app&#x27;s Documents directory, if any.
+    var photoFileName: String?
+
+    init(
+        id: UUID = UUID(),
+        timestamp: Date,
+        latitude: Double,
+        longitude: Double,
+        source: TreeSource,
+        status: TreeHealthStatus,
+        sonicVelocity: Double? = nil,
+        confidence: Double? = nil,
+        notes: String? = nil,
+        photoFileName: String? = nil
+    ) {
+        self.id = id
+        self.timestamp = timestamp
+        self.latitude = latitude
+        self.longitude = longitude
+        self.source = source
+        self.status = status
+        self.sonicVelocity = sonicVelocity
+        self.confidence = confidence
+        self.notes = notes
+        self.photoFileName = photoFileName
+    }
+
+    var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">BLEManager.swift</span><span class="flabel">Bluetooth LE central</span></summary>
+        <pre><code class="language-swift">import Foundation
+import CoreBluetooth
+
+/// One reading from the ESP32 trunk sensor, decoded from its BLE JSON payload.
+/// status: 0 = alive, 1 = dead, 2 = uncertain (see DeadTreeSensor.ino).
+struct SensorReading: Codable, Equatable {
+    let v: Double
+    let amp: Int
+    let status: Int
+}
+
+/// Talks to the ESP32 &quot;DeadTreeSensor&quot; over Bluetooth LE using CoreBluetooth.
+///
+/// NOTE: CoreBluetooth does not work in the iOS Simulator - you need a real
+/// iPhone to test against real hardware. Use `simulateReading(status:)` to
+/// exercise the rest of the app (UI, logging, map) without hardware.
+final class BLEManager: NSObject, ObservableObject {
+    static let serviceUUID = CBUUID(string: &quot;A1B2C3D4-0001-1000-8000-00805F9B34FB&quot;)
+    static let readingCharUUID = CBUUID(string: &quot;A1B2C3D4-0002-1000-8000-00805F9B34FB&quot;)
+    static let commandCharUUID = CBUUID(string: &quot;A1B2C3D4-0003-1000-8000-00805F9B34FB&quot;)
+
+    @Published var isBluetoothReady = false
+    @Published var discoveredPeripherals: [CBPeripheral] = []
+    @Published var connectedPeripheral: CBPeripheral?
+    @Published var latestReading: SensorReading?
+    @Published var connectionState: String = &quot;Disconnected&quot;
+
+    private var centralManager: CBCentralManager!
+    private var readingCharacteristic: CBCharacteristic?
+    private var commandCharacteristic: CBCharacteristic?
+
+    override init() {
+        super.init()
+        centralManager = CBCentralManager(delegate: self, queue: nil)
+    }
+
+    func startScanning() {
+        guard centralManager.state == .poweredOn else { return }
+        discoveredPeripherals.removeAll()
+        connectionState = &quot;Scanning...&quot;
+        centralManager.scanForPeripherals(withServices: [Self.serviceUUID], options: nil)
+    }
+
+    func stopScanning() {
+        centralManager.stopScan()
+    }
+
+    func connect(_ peripheral: CBPeripheral) {
+        connectionState = &quot;Connecting...&quot;
+        centralManager.connect(peripheral, options: nil)
+    }
+
+    func disconnect() {
+        if let peripheral = connectedPeripheral {
+            centralManager.cancelPeripheralConnection(peripheral)
+        }
+    }
+
+    /// Asks the connected sensor to take a fresh sonic pulse reading.
+    func requestPulseReading() {
+        guard let peripheral = connectedPeripheral, let characteristic = commandCharacteristic else { return }
+        let command = &quot;PULSE&quot;.data(using: .utf8)!
+        peripheral.writeValue(command, for: characteristic, type: .withResponse)
+    }
+
+    /// Fakes a reading with no hardware attached, for UI development/testing
+    /// in the Simulator or before you&#x27;ve built the Arduino sensor.
+    /// status: 0 = alive, 1 = dead, 2 = uncertain
+    func simulateReading(status: Int) {
+        let velocity: Double = status == 1 ? 650 : (status == 0 ? 1450 : 950)
+        latestReading = SensorReading(v: velocity, amp: Int.random(in: 400...900), status: status)
+        connectionState = &quot;Simulated (no hardware connected)&quot;
+    }
+}
+
+extension BLEManager: CBCentralManagerDelegate {
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        isBluetoothReady = central.state == .poweredOn
+        if central.state != .poweredOn {
+            connectionState = &quot;Bluetooth unavailable&quot;
+        }
+    }
+
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
+        if !discoveredPeripherals.contains(where: { $0.identifier == peripheral.identifier }) {
+            discoveredPeripherals.append(peripheral)
+        }
+    }
+
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        connectedPeripheral = peripheral
+        connectionState = &quot;Connected: \(peripheral.name ?? &quot;sensor&quot;)&quot;
+        peripheral.delegate = self
+        peripheral.discoverServices([Self.serviceUUID])
+        stopScanning()
+    }
+
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        connectionState = &quot;Failed to connect&quot;
+    }
+
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        connectedPeripheral = nil
+        readingCharacteristic = nil
+        commandCharacteristic = nil
+        connectionState = &quot;Disconnected&quot;
+    }
+}
+
+extension BLEManager: CBPeripheralDelegate {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        guard let services = peripheral.services else { return }
+        for service in services where service.uuid == Self.serviceUUID {
+            peripheral.discoverCharacteristics([Self.readingCharUUID, Self.commandCharUUID], for: service)
+        }
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        guard let characteristics = service.characteristics else { return }
+        for characteristic in characteristics {
+            if characteristic.uuid == Self.readingCharUUID {
+                readingCharacteristic = characteristic
+                peripheral.setNotifyValue(true, for: characteristic)
+            } else if characteristic.uuid == Self.commandCharUUID {
+                commandCharacteristic = characteristic
+            }
+        }
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard characteristic.uuid == Self.readingCharUUID, let data = characteristic.value else { return }
+        if let reading = try? JSONDecoder().decode(SensorReading.self, from: data) {
+            DispatchQueue.main.async {
+                self.latestReading = reading
+            }
+        }
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">LocationManager.swift</span><span class="flabel">GPS wrapper</span></summary>
+        <pre><code class="language-swift">import Foundation
+import CoreLocation
+
+/// Wraps CoreLocation to provide the phone&#x27;s current GPS coordinate, used to
+/// tag every logged tree (both sensor and aerial readings).
+final class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    private let manager = CLLocationManager()
+
+    @Published var currentLocation: CLLocationCoordinate2D?
+    @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
+
+    override init() {
+        super.init()
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+    }
+
+    func requestPermission() {
+        manager.requestWhenInUseAuthorization()
+    }
+
+    func start() {
+        manager.startUpdatingLocation()
+    }
+
+    func stop() {
+        manager.stopUpdatingLocation()
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        authorizationStatus = manager.authorizationStatus
+        if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
+            start()
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        currentLocation = locations.last?.coordinate
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">TreeHealthVisionAnalyzer.swift</span><span class="flabel">Canopy classifier</span></summary>
+        <pre><code class="language-swift">import UIKit
+import CoreVideo
+
+/// Result of classifying a canopy view (single photo or one live camera frame).
+struct AerialClassification {
+    let status: TreeHealthStatus
+    /// How confident the classifier is in `status`, 0-1.
+    let confidence: Double
+    /// The combined &quot;how dead does this look&quot; score (0-1) that `status` was
+    /// derived from - a blend of `colorDeadFraction` and `porosityFraction`.
+    let deadCanopyFraction: Double
+    /// Sub-score: fraction of scored pixels that are both non-green AND
+    /// desaturated (i.e. brown/gray, not vibrant autumn color). Exposed
+    /// separately so the live UI can show it while you calibrate.
+    let colorDeadFraction: Double
+    /// Sub-score: fraction of scored pixels that are bright enough to be sky
+    /// showing through gaps in a sparse/bare canopy. Exposed for calibration
+    /// too.
+    let porosityFraction: Double
+}
+
+/// Anything that can look at a top-down canopy image/frame and call
+/// dead/alive/uncertain. This indirection exists so the v1 heuristic below
+/// can be swapped for a real trained Core ML model later without touching
+/// the views.
+protocol TreeHealthClassifying {
+    /// Classify a static image (kept for reuse/testing; the live Aerial tab
+    /// no longer uses this path directly - see classify(pixelBuffer:foregroundMask:)).
+    func classify(image: UIImage) -&gt; AerialClassification
+    /// Classify one live camera frame, called continuously while scanning.
+    /// Expects 32BGRA pixel format (that&#x27;s what CameraLiveScanner requests).
+    /// `foregroundMask`, if provided, is an 8-bit single-channel mask the
+    /// same size as `pixelBuffer` (0 = background, 255 = foreground subject,
+    /// as produced by CanopySegmenter) - when present, only pixels inside
+    /// the masked subject are scored, so background sky/ground/pavement
+    /// don&#x27;t get counted as canopy.
+    func classify(pixelBuffer: CVPixelBuffer, foregroundMask: CVPixelBuffer?) -&gt; AerialClassification
+}
+
+extension TreeHealthClassifying {
+    /// Convenience overload for callers with no mask available.
+    func classify(pixelBuffer: CVPixelBuffer) -&gt; AerialClassification {
+        classify(pixelBuffer: pixelBuffer, foregroundMask: nil)
+    }
+}
+
+/// v1 heuristic classifier: no machine learning model, no training data
+/// required. It looks at three color/brightness-derived signals per pixel,
+/// none of which need a trained model:
+///
+/// 1. **Greenness** (Excess Green Index) - live, chlorophyll-rich foliage is
+///    disproportionately green from above.
+/// 2. **Saturation** - dead/bare wood is desaturated gray-brown. This is what
+///    keeps vibrant (highly saturated) autumn reds/oranges/yellows from
+///    being misread as &quot;dead&quot; just because they&#x27;re not green.
+/// 3. **Porosity** (a texture proxy) - dense healthy foliage occludes the
+///    sky almost completely when viewed from directly above; a sparse or
+///    bare canopy lets bright sky show through the gaps between branches.
+///    This is measured as the fraction of scored pixels that are bright
+///    enough to plausibly be sky glimpsed through the canopy.
+///
+/// This is a reasonable, honest step up from color alone, but it is still
+/// NOT as accurate as a real trained model. Research on this exact problem
+/// (standing dead tree detection in UAV RGB imagery) uses trained deep
+/// models - e.g. Faster R-CNN, YOLOv8/YOLO11 instance segmentation, or
+/// U-Net-based segmentation - trained on labeled aerial photos, and reaches
+/// much higher accuracy than any hand-written heuristic can. See README.md
+/// for how to train one and drop it in via a new `TreeHealthClassifying`
+/// conformance - nothing else in the app depends on this specific class.
+final class HeuristicCanopyClassifier: TreeHealthClassifying {
+    /// Sample every Nth pixel in each dimension - full-resolution frames
+    /// don&#x27;t need per-pixel analysis for this heuristic, and this keeps
+    /// classification fast enough to run continuously on-device.
+    private let sampleStride = 4
+
+    /// A pixel is counted as scoreable (not sky/pavement/deep shadow) once
+    /// its channel sum passes this brightness floor.
+    private let canopyBrightnessFloor: Double = 60
+
+    /// Excess Green below this value is treated as &quot;not distinctly green&quot;.
+    private let deadPixelExGThreshold: Double = 10
+
+    /// Saturation (0-1) below this is treated as &quot;desaturated&quot; - a pixel
+    /// only counts toward colorDeadFraction if it&#x27;s BOTH non-green and
+    /// desaturated, which is what rules out vibrant fall foliage.
+    private let deadPixelMaxSaturation: Double = 0.35
+
+    /// Channel sum above this is treated as &quot;bright enough to be sky
+    /// glimpsed through canopy gaps&quot; for the porosity signal.
+    private let skyBrightnessThreshold: Double = 650
+
+    /// How much weight the color signal vs. the porosity signal gets in the
+    /// combined dead score. Color is weighted higher since it&#x27;s the more
+    /// direct signal; porosity is noisier (glare, gaps in framing, etc.).
+    private let colorWeight = 0.65
+    private let porosityWeight = 0.35
+
+    /// Foreground mask pixel values (0-255) at or above this are treated as
+    /// &quot;part of the subject&quot; - see CanopySegmenter for how the mask is built.
+    private let maskForegroundThreshold: UInt8 = 128
+
+    // MARK: - Static image path (RGBA/whatever CGImage gives us; only the
+    // green channel&#x27;s position matters below, and it&#x27;s at byte offset+1 in
+    // both RGBA and BGRA layouts, so this works for standard photo decoding).
+
+    func classify(image: UIImage) -&gt; AerialClassification {
+        guard let cgImage = image.cgImage,
+              let dataProvider = cgImage.dataProvider,
+              let data = dataProvider.data,
+              let bytes = CFDataGetBytePtr(data) else {
+            return .uncertainFallback
+        }
+
+        let width = cgImage.width
+        let height = cgImage.height
+        let bytesPerPixel = max(cgImage.bitsPerPixel / 8, 3)
+        let bytesPerRow = cgImage.bytesPerRow
+        let dataLength = CFDataGetLength(data)
+
+        guard width &gt; 0, height &gt; 0, bytesPerPixel &gt;= 3 else {
+            return .uncertainFallback
+        }
+
+        var tally = PixelTally()
+
+        for y in stride(from: 0, to: height, by: sampleStride) {
+            for x in stride(from: 0, to: width, by: sampleStride) {
+                let offset = y * bytesPerRow + x * bytesPerPixel
+                guard offset + 2 &lt; dataLength else { continue }
+
+                let r = Double(bytes[offset])
+                let g = Double(bytes[offset + 1])
+                let b = Double(bytes[offset + 2])
+                score(r: r, g: g, b: b, into: &amp;tally)
+            }
+        }
+
+        return classification(from: tally)
+    }
+
+    // MARK: - Live camera frame path (32BGRA, straight from AVCaptureVideoDataOutput)
+
+    func classify(pixelBuffer: CVPixelBuffer, foregroundMask: CVPixelBuffer?) -&gt; AerialClassification {
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+        if let foregroundMask {
+            CVPixelBufferLockBaseAddress(foregroundMask, .readOnly)
+        }
+        defer {
+            if let foregroundMask {
+                CVPixelBufferUnlockBaseAddress(foregroundMask, .readOnly)
+            }
+        }
+
+        guard let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer) else {
+            return .uncertainFallback
+        }
+
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
+        guard width &gt; 0, height &gt; 0 else {
+            return .uncertainFallback
+        }
+        let buffer = baseAddress.assumingMemoryBound(to: UInt8.self)
+
+        // The mask, if present, is expected to be a single-channel 8-bit
+        // buffer at the SAME width/height as pixelBuffer (that&#x27;s what
+        // CanopySegmenter&#x27;s generateScaledMaskForImage call produces). If
+        // for any reason it&#x27;s a different size or format than expected,
+        // we defensively ignore it rather than crash or read garbage.
+        var maskBase: UnsafeMutablePointer&lt;UInt8&gt;?
+        var maskBytesPerRow = 0
+        if let foregroundMask,
+           CVPixelBufferGetWidth(foregroundMask) == width,
+           CVPixelBufferGetHeight(foregroundMask) == height,
+           let maskAddress = CVPixelBufferGetBaseAddress(foregroundMask) {
+            maskBase = maskAddress.assumingMemoryBound(to: UInt8.self)
+            maskBytesPerRow = CVPixelBufferGetBytesPerRow(foregroundMask)
+        }
+
+        var tally = PixelTally()
+
+        for y in stride(from: 0, to: height, by: sampleStride) {
+            for x in stride(from: 0, to: width, by: sampleStride) {
+                if let maskBase {
+                    let maskValue = maskBase[y * maskBytesPerRow + x]
+                    guard maskValue &gt;= maskForegroundThreshold else { continue }
+                }
+
+                let offset = y * bytesPerRow + x * 4 // BGRA = 4 bytes/pixel
+                let b = Double(buffer[offset])
+                let g = Double(buffer[offset + 1])
+                let r = Double(buffer[offset + 2])
+                score(r: r, g: g, b: b, into: &amp;tally)
+            }
+        }
+
+        return classification(from: tally)
+    }
+
+    // MARK: - Shared scoring
+
+    private struct PixelTally {
+        var scoredPixels = 0
+        var colorDeadPixels = 0
+        var skyBrightPixels = 0
+    }
+
+    private func score(r: Double, g: Double, b: Double, into tally: inout PixelTally) {
+        let sum = r + g + b
+        guard sum &gt; canopyBrightnessFloor else { return } // skip near-black shadow
+
+        tally.scoredPixels += 1
+
+        let excessGreen = 2 * g - r - b
+        let maxChannel = max(r, g, b)
+        let minChannel = min(r, g, b)
+        let saturation = maxChannel &gt; 0 ? (maxChannel - minChannel) / maxChannel : 0
+
+        if excessGreen &lt; deadPixelExGThreshold &amp;&amp; saturation &lt; deadPixelMaxSaturation {
+            tally.colorDeadPixels += 1
+        }
+        if sum &gt; skyBrightnessThreshold {
+            tally.skyBrightPixels += 1
+        }
+    }
+
+    private func classification(from tally: PixelTally) -&gt; AerialClassification {
+        guard tally.scoredPixels &gt; 0 else { return .uncertainFallback }
+
+        let colorDeadFraction = Double(tally.colorDeadPixels) / Double(tally.scoredPixels)
+        let porosityFraction = Double(tally.skyBrightPixels) / Double(tally.scoredPixels)
+        let combined = colorWeight * colorDeadFraction + porosityWeight * porosityFraction
+
+        let status: TreeHealthStatus
+        let confidence: Double
+        switch combined {
+        case ..&lt;0.35:
+            status = .alive
+            confidence = 1 - combined
+        case 0.35..&lt;0.6:
+            status = .uncertain
+            confidence = 0.5
+        default:
+            status = .dead
+            confidence = combined
+        }
+
+        return AerialClassification(
+            status: status,
+            confidence: confidence,
+            deadCanopyFraction: combined,
+            colorDeadFraction: colorDeadFraction,
+            porosityFraction: porosityFraction
+        )
+    }
+}
+
+private extension AerialClassification {
+    static var uncertainFallback: AerialClassification {
+        AerialClassification(status: .uncertain, confidence: 0, deadCanopyFraction: 0, colorDeadFraction: 0, porosityFraction: 0)
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">SceneVegetationGate.swift</span><span class="flabel">Vegetation pre-filter</span></summary>
+        <pre><code class="language-swift">import Vision
+import CoreVideo
+
+/// A cheap &quot;does this frame plausibly show vegetation/outdoors at all?&quot; check,
+/// run BEFORE the per-pixel color heuristic in TreeHealthVisionAnalyzer.
+///
+/// Why this exists: the color heuristic alone has no concept of &quot;tree&quot; - it
+/// just measures how green vs. brown/gray each pixel is. A couch, a wood
+/// floor, or a wall satisfies &quot;not green&quot; exactly as well as dead canopy
+/// does, so pointed indoors it will happily call your living room a dead
+/// tree. This gate uses Apple&#x27;s built-in Vision scene/object classifier
+/// (VNClassifyImageRequest - ships on-device with iOS, no training or
+/// network access required) to check whether the frame&#x27;s top classifications
+/// look like trees/forest/vegetation/outdoors before bothering with color
+/// analysis at all.
+///
+/// This is still a coarse filter, not true tree detection - see README.md
+/// for what a real solution (a model trained specifically on aerial canopy
+/// photos) looks like.
+final class SceneVegetationGate {
+    private let vegetationKeywords = [
+        &quot;tree&quot;, &quot;forest&quot;, &quot;leaf&quot;, &quot;leaves&quot;, &quot;vegetation&quot;, &quot;grass&quot;,
+        &quot;plant&quot;, &quot;park&quot;, &quot;woodland&quot;, &quot;shrub&quot;, &quot;canopy&quot;, &quot;meadow&quot;,
+        &quot;outdoor&quot;, &quot;field&quot;, &quot;garden&quot;, &quot;grove&quot;, &quot;foliage&quot;, &quot;farm&quot;,
+        &quot;countryside&quot;, &quot;jungle&quot;, &quot;orchard&quot;
+    ]
+    private let minimumConfidence: Float = 0.15
+
+    /// Checks up to the top 10 classifications Vision returns for the frame;
+    /// if any plausibly vegetation/outdoor label clears the confidence bar,
+    /// the frame is considered worth running the color heuristic on.
+    func isLikelyVegetationScene(pixelBuffer: CVPixelBuffer) -&gt; Bool {
+        let request = VNClassifyImageRequest()
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+
+        do {
+            try handler.perform([request])
+        } catch {
+            // Classification failed for some reason (e.g. transient Vision
+            // error) - fail open rather than silently never detecting
+            // anything. The color heuristic still applies its own thresholds.
+            return true
+        }
+
+        guard let observations = request.results else { return true }
+
+        for observation in observations.prefix(10) {
+            guard observation.confidence &gt;= minimumConfidence else { continue }
+            let identifier = observation.identifier.lowercased()
+            if vegetationKeywords.contains(where: { identifier.contains($0) }) {
+                return true
+            }
+        }
+        return false
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">CanopySegmenter.swift</span><span class="flabel">Subject isolation</span></summary>
+        <pre><code class="language-swift">import Vision
+import CoreVideo
+
+/// Isolates the salient foreground subject in a frame (the tree/canopy)
+/// from its background (sky, ground, neighboring objects) before the color
+/// heuristic scores it, using Vision&#x27;s built-in subject-lifting request
+/// (`VNGenerateForegroundInstanceMaskRequest` - on-device, ships with iOS,
+/// no training or network access required, same family of API behind the
+/// &quot;lift subject from photo&quot; feature in Photos).
+///
+/// Why this matters: without this, TreeHealthVisionAnalyzer scores every
+/// sampled pixel in the whole frame, including sky, ground, and whatever
+/// else happens to be in view. That dilutes and skews the color/porosity
+/// signal. With a mask, only pixels belonging to the thing Vision judged
+/// to be the standalone subject of the frame get scored.
+///
+/// CAVEAT: I couldn&#x27;t test this against real camera hardware while writing
+/// it, so the mask&#x27;s exact pixel format is implemented per Apple&#x27;s
+/// documented behavior (a single-channel 8-bit buffer, 0 = background,
+/// 255 = foreground, scaled to match the source image) rather than
+/// something I verified on-device. TreeHealthVisionAnalyzer defensively
+/// ignores the mask if its dimensions don&#x27;t match, so a format surprise
+/// degrades to &quot;score the whole frame&quot; rather than crashing - but if you
+/// notice detections behaving oddly, this is the first place to check with
+/// a debug print of a few raw mask byte values.
+final class CanopySegmenter {
+    /// Returns a single-channel 8-bit mask the same size as `pixelBuffer`,
+    /// or nil if Vision didn&#x27;t find any standalone salient subject in the
+    /// frame (e.g. camera pointed at an undifferentiated field of grass or
+    /// open sky with nothing distinct to isolate).
+    func segmentForegroundMask(pixelBuffer: CVPixelBuffer) -&gt; CVPixelBuffer? {
+        let request = VNGenerateForegroundInstanceMaskRequest()
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+
+        do {
+            try handler.perform([request])
+        } catch {
+            return nil // fail open to &quot;no distinct subject&quot; rather than crash
+        }
+
+        guard let result = request.results?.first, !result.allInstances.isEmpty else {
+            return nil
+        }
+
+        do {
+            return try result.generateScaledMaskForImage(forInstances: result.allInstances, from: handler)
+        } catch {
+            return nil
+        }
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">CameraLiveScanner.swift</span><span class="flabel">Live scan pipeline</span></summary>
+        <pre><code class="language-swift">import AVFoundation
+import UIKit
+import CoreImage
+import CoreLocation
+
+/// Runs the phone&#x27;s camera continuously (handheld or drone-mounted) and
+/// classifies frames on the fly, looking for dead canopy. When it sees a
+/// sustained &quot;dead&quot; signal, it fires `onAutoDetectDeadTree` so the view can
+/// log a TreeRecord automatically - no manual photo capture needed.
+///
+/// Each sampled frame goes through two Vision-based gates before the color
+/// heuristic ever runs:
+///   1. `SceneVegetationGate` - is this frame even plausibly outdoors/
+///      vegetation? (rules out indoor rooms, pavement, etc.)
+///   2. `CanopySegmenter` - can Vision isolate a distinct standalone subject
+///      (the tree) from the background? Only pixels inside that subject get
+///      scored, so sky/ground/neighboring objects don&#x27;t dilute the result.
+/// Only after both gates pass does `HeuristicCanopyClassifier` score the
+/// masked pixels on color, saturation, and canopy porosity (see
+/// TreeHealthVisionAnalyzer.swift for what those mean).
+///
+/// Running two Vision requests per sampled frame is noticeably heavier than
+/// the color math alone - if scanning feels sluggish on your device, the
+/// first thing to try is raising `minFrameProcessingInterval` below.
+///
+/// Debounce strategy (tune the constants below to taste):
+///   - Frames are only classified every `minFrameProcessingInterval` seconds,
+///     not on every single frame, to keep this cheap enough to run continuously.
+///   - A detection only fires after `requiredConsecutiveDeadFrames` classified
+///     frames in a row come back &quot;dead&quot; - this filters out single-frame noise
+///     (e.g. a shadow, a glare, a half-second of motion blur).
+///   - After firing, it won&#x27;t fire again for `minSecondsBetweenAutoLogs`
+///     seconds UNLESS the phone has also moved at least
+///     `minMetersBetweenAutoLogs` from where the last log happened - this
+///     stops the same tree from being logged repeatedly while you hover or
+///     circle over it, while still letting a fast flyover log two different
+///     trees close together in time.
+final class CameraLiveScanner: NSObject, ObservableObject {
+    @Published var latestClassification: AerialClassification?
+    @Published var isRunning = false
+    @Published var consecutiveDeadFrames = 0
+    /// False when the current frame doesn&#x27;t look like it contains vegetation/
+    /// outdoors at all (see SceneVegetationGate) - lets the UI show &quot;no
+    /// canopy in view&quot; instead of running (and possibly misfiring) the color
+    /// heuristic on indoor scenes, pavement, sky, etc.
+    @Published var vegetationPresent = true
+    /// False when the vegetation gate passed but Vision couldn&#x27;t isolate a
+    /// distinct standalone subject to score (see CanopySegmenter) - e.g. an
+    /// undifferentiated field of grass or open sky with nothing to isolate.
+    @Published var hasDistinctSubject = true
+
+    let session = AVCaptureSession()
+
+    /// Called on the main thread when a sustained dead-tree detection fires.
+    /// Passes the classification and a snapshot image of the triggering frame.
+    var onAutoDetectDeadTree: ((AerialClassification, UIImage?) -&gt; Void)?
+    /// Lets the scanner ask the view for the phone&#x27;s current GPS coordinate
+    /// (used for the distance-based part of the cooldown logic).
+    var currentCoordinateProvider: (() -&gt; CLLocationCoordinate2D?)?
+
+    private let videoOutput = AVCaptureVideoDataOutput()
+    private let processingQueue = DispatchQueue(label: &quot;com.deadtreelogger.frame-processing&quot;)
+    private let classifier: TreeHealthClassifying = HeuristicCanopyClassifier()
+    private let vegetationGate = SceneVegetationGate()
+    private let segmenter = CanopySegmenter()
+    private let ciContext = CIContext()
+    private var configured = false
+
+    // Tuning knobs - see class doc comment above.
+    // Bumped up from 0.6s now that each processed frame runs two Vision
+    // requests (scene classification + subject segmentation) plus the
+    // color heuristic - lower this if your device keeps up fine and you
+    // want snappier detection; raise it if scanning feels sluggish.
+    private let minFrameProcessingInterval: TimeInterval = 1.0
+    private let requiredConsecutiveDeadFrames = 3
+    private let minSecondsBetweenAutoLogs: TimeInterval = 8
+    private let minMetersBetweenAutoLogs: CLLocationDistance = 5
+
+    private var lastProcessedAt: Date = .distantPast
+    private var lastAutoLogDate: Date?
+    private var lastLoggedCoordinate: CLLocationCoordinate2D?
+
+    func configureAndStart() {
+        processingQueue.async { [weak self] in
+            self?.configureSessionIfNeeded()
+            guard let self, !self.session.isRunning else { return }
+            self.session.startRunning()
+            DispatchQueue.main.async { self.isRunning = true }
+        }
+    }
+
+    func stop() {
+        processingQueue.async { [weak self] in
+            guard let self, self.session.isRunning else { return }
+            self.session.stopRunning()
+            DispatchQueue.main.async {
+                self.isRunning = false
+                self.consecutiveDeadFrames = 0
+            }
+        }
+    }
+
+    private func configureSessionIfNeeded() {
+        guard !configured else { return }
+        configured = true
+
+        session.beginConfiguration()
+        session.sessionPreset = .hd1280x720
+
+        if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+           let input = try? AVCaptureDeviceInput(device: device),
+           session.canAddInput(input) {
+            session.addInput(input)
+        }
+
+        videoOutput.videoSettings = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+        ]
+        videoOutput.alwaysDiscardsLateVideoFrames = true
+        videoOutput.setSampleBufferDelegate(self, queue: processingQueue)
+        if session.canAddOutput(videoOutput) {
+            session.addOutput(videoOutput)
+        }
+
+        if let connection = videoOutput.connection(with: .video),
+           connection.isVideoRotationAngleSupported(90) {
+            connection.videoRotationAngle = 90 // portrait; this prototype assumes a fixed mount orientation
+        }
+
+        session.commitConfiguration()
+    }
+}
+
+extension CameraLiveScanner: AVCaptureVideoDataOutputSampleBufferDelegate {
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        let now = Date()
+        guard now.timeIntervalSince(lastProcessedAt) &gt;= minFrameProcessingInterval else { return }
+        lastProcessedAt = now
+
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+        // Gate 1: don&#x27;t even run the color heuristic on frames that don&#x27;t
+        // plausibly show vegetation/outdoors (indoor rooms, pavement, sky,
+        // etc.) - this is what was causing &quot;dead trees&quot; in the living room,
+        // since the color heuristic alone has no idea what a tree is.
+        guard vegetationGate.isLikelyVegetationScene(pixelBuffer: pixelBuffer) else {
+            DispatchQueue.main.async { [weak self] in
+                self?.vegetationPresent = false
+                self?.hasDistinctSubject = true
+                self?.latestClassification = nil
+                self?.consecutiveDeadFrames = 0
+            }
+            return
+        }
+
+        // Gate 2: try to isolate the standalone subject (the tree/canopy)
+        // from its background before scoring it. If Vision can&#x27;t find a
+        // distinct subject, skip scoring this frame rather than analyzing
+        // the whole scene (sky, ground, and all) undifferentiated.
+        guard let mask = segmenter.segmentForegroundMask(pixelBuffer: pixelBuffer) else {
+            DispatchQueue.main.async { [weak self] in
+                self?.vegetationPresent = true
+                self?.hasDistinctSubject = false
+                self?.latestClassification = nil
+                self?.consecutiveDeadFrames = 0
+            }
+            return
+        }
+
+        let result = classifier.classify(pixelBuffer: pixelBuffer, foregroundMask: mask)
+        // Convert to a UIImage snapshot now, on this queue, while the pixel
+        // buffer is still guaranteed valid - CVPixelBuffers from AVCapture
+        // must not be retained/used past this callback.
+        let snapshot = makeUIImage(from: pixelBuffer)
+
+        DispatchQueue.main.async { [weak self] in
+            self?.vegetationPresent = true
+            self?.hasDistinctSubject = true
+            self?.handle(result: result, snapshot: snapshot)
+        }
+    }
+
+    private func handle(result: AerialClassification, snapshot: UIImage?) {
+        latestClassification = result
+        consecutiveDeadFrames = (result.status == .dead) ? consecutiveDeadFrames + 1 : 0
+
+        guard consecutiveDeadFrames &gt;= requiredConsecutiveDeadFrames else { return }
+
+        let currentCoordinate = currentCoordinateProvider?()
+        if let lastDate = lastAutoLogDate, Date().timeIntervalSince(lastDate) &lt; minSecondsBetweenAutoLogs {
+            let movedFarEnough: Bool
+            if let last = lastLoggedCoordinate, let current = currentCoordinate {
+                let distance = CLLocation(latitude: last.latitude, longitude: last.longitude)
+                    .distance(from: CLLocation(latitude: current.latitude, longitude: current.longitude))
+                movedFarEnough = distance &gt;= minMetersBetweenAutoLogs
+            } else {
+                movedFarEnough = false // no location fix - fall back to time-only cooldown
+            }
+            guard movedFarEnough else { return }
+        }
+
+        lastAutoLogDate = Date()
+        lastLoggedCoordinate = currentCoordinate
+        consecutiveDeadFrames = 0
+
+        onAutoDetectDeadTree?(result, snapshot)
+    }
+
+    private func makeUIImage(from pixelBuffer: CVPixelBuffer) -&gt; UIImage? {
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        guard let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent) else { return nil }
+        return UIImage(cgImage: cgImage)
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">PhotoStore.swift</span><span class="flabel">Photo persistence</span></summary>
+        <pre><code class="language-swift">import UIKit
+
+/// Saves/loads aerial photos as JPEGs in the app&#x27;s Documents directory, since
+/// SwiftData records store the filename, not the image bytes.
+enum PhotoStore {
+    static func save(image: UIImage) -&gt; String? {
+        guard let data = image.jpegData(compressionQuality: 0.8) else { return nil }
+        let fileName = &quot;\(UUID().uuidString).jpg&quot;
+        let url = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(fileName)
+        do {
+            try data.write(to: url)
+            return fileName
+        } catch {
+            print(&quot;PhotoStore: failed to save image - \(error)&quot;)
+            return nil
+        }
+    }
+
+    static func load(fileName: String) -&gt; UIImage? {
+        let url = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(fileName)
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return UIImage(data: data)
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">ContentView.swift</span><span class="flabel">Tab bar root</span></summary>
+        <pre><code class="language-swift">import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        TabView {
+            SensorScanView()
+                .tabItem { Label(&quot;Sensor&quot;, systemImage: &quot;waveform.path.ecg&quot;) }
+
+            AerialScanView()
+                .tabItem { Label(&quot;Aerial&quot;, systemImage: &quot;camera.on.rectangle&quot;) }
+
+            TreeMapView()
+                .tabItem { Label(&quot;Map&quot;, systemImage: &quot;map&quot;) }
+
+            TreeListView()
+                .tabItem { Label(&quot;Log&quot;, systemImage: &quot;list.bullet&quot;) }
+        }
+    }
+}
+
+#Preview {
+    ContentView()
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">SensorScanView.swift</span><span class="flabel">Sensor tab UI</span></summary>
+        <pre><code class="language-swift">import SwiftUI
+import SwiftData
+
+struct SensorScanView: View {
+    @StateObject private var ble = BLEManager()
+    @StateObject private var location = LocationManager()
+    @Environment(\.modelContext) private var modelContext
+    @State private var lastSavedMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                statusSection
+
+                if let reading = ble.latestReading {
+                    readingCard(reading)
+                } else {
+                    ContentUnavailableView(
+                        &quot;No reading yet&quot;,
+                        systemImage: &quot;waveform.path.ecg&quot;,
+                        description: Text(&quot;Connect to a DeadTreeSensor and take a pulse reading, or try Demo Mode below.&quot;)
+                    )
+                }
+
+                Spacer()
+                actionButtons
+            }
+            .padding()
+            .navigationTitle(&quot;Sensor Scan&quot;)
+            .onAppear {
+                location.requestPermission()
+                ble.startScanning()
+            }
+        }
+    }
+
+    private var statusSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(ble.connectionState, systemImage: ble.connectedPeripheral == nil ? &quot;antenna.radiowaves.left.and.right.slash&quot; : &quot;antenna.radiowaves.left.and.right&quot;)
+                .font(.subheadline)
+
+            if ble.connectedPeripheral == nil &amp;&amp; !ble.discoveredPeripherals.isEmpty {
+                List(ble.discoveredPeripherals, id: \.identifier) { peripheral in
+                    Button(peripheral.name ?? &quot;Unnamed sensor&quot;) {
+                        ble.connect(peripheral)
+                    }
+                }
+                .frame(height: 140)
+                .listStyle(.plain)
+            }
+        }
+    }
+
+    private func readingCard(_ reading: SensorReading) -&gt; some View {
+        VStack(spacing: 6) {
+            Text(statusLabel(reading.status))
+                .font(.title.bold())
+                .foregroundStyle(statusColor(reading.status))
+            Text(&quot;Sonic velocity: \(reading.v, specifier: &quot;%.0f&quot;) m/s&quot;)
+            Text(&quot;Peak amplitude: \(reading.amp)&quot;)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var actionButtons: some View {
+        VStack(spacing: 12) {
+            Button(&quot;Take Pulse Reading&quot;) { ble.requestPulseReading() }
+                .buttonStyle(.borderedProminent)
+                .disabled(ble.connectedPeripheral == nil)
+
+            Button(&quot;Log This Tree&quot;) { saveReading() }
+                .buttonStyle(.bordered)
+                .disabled(ble.latestReading == nil || location.currentLocation == nil)
+
+            if let message = lastSavedMessage {
+                Text(message).font(.footnote).foregroundStyle(.secondary)
+            }
+
+            Divider().padding(.vertical, 4)
+
+            Text(&quot;No hardware yet? Try demo mode:&quot;)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            HStack {
+                Button(&quot;Simulate Dead&quot;) { ble.simulateReading(status: 1) }
+                Button(&quot;Simulate Alive&quot;) { ble.simulateReading(status: 0) }
+                Button(&quot;Simulate Uncertain&quot;) { ble.simulateReading(status: 2) }
+            }
+            .font(.caption)
+            .buttonStyle(.bordered)
+        }
+    }
+
+    private func statusLabel(_ status: Int) -&gt; String {
+        switch status {
+        case 1: return &quot;DEAD TREE DETECTED&quot;
+        case 0: return &quot;Tree appears healthy&quot;
+        default: return &quot;Uncertain — retest recommended&quot;
+        }
+    }
+
+    private func statusColor(_ status: Int) -&gt; Color {
+        switch status {
+        case 1: return .red
+        case 0: return .green
+        default: return .orange
+        }
+    }
+
+    private func saveReading() {
+        guard let reading = ble.latestReading, let coordinate = location.currentLocation else { return }
+        let record = TreeRecord(
+            timestamp: .now,
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            source: .sensor,
+            status: TreeHealthStatus(sensorStatus: reading.status),
+            sonicVelocity: reading.v,
+            notes: &quot;Peak amplitude \(reading.amp)&quot;
+        )
+        modelContext.insert(record)
+        lastSavedMessage = String(format: &quot;Saved at %.5f, %.5f&quot;, coordinate.latitude, coordinate.longitude)
+    }
+}
+
+#Preview {
+    SensorScanView()
+        .modelContainer(for: TreeRecord.self, inMemory: true)
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">AerialScanView.swift</span><span class="flabel">Aerial tab UI</span></summary>
+        <pre><code class="language-swift">import SwiftUI
+import SwiftData
+import AVFoundation
+
+/// Continuous aerial scanning: point the camera (handheld, or mounted on a
+/// drone) at tree canopy and this view classifies frames in the background,
+/// automatically logging a TreeRecord whenever it sees a sustained dead-tree
+/// signal. There&#x27;s no manual &quot;take a photo&quot; step - see CameraLiveScanner for
+/// the detection/debounce logic that decides when to auto-log.
+struct AerialScanView: View {
+    @Environment(\.modelContext) private var modelContext
+    @StateObject private var location = LocationManager()
+    @StateObject private var scanner = CameraLiveScanner()
+    @State private var cameraAuthorized = false
+    @State private var loggedThisSessionCount = 0
+    @State private var lastLogMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                if cameraAuthorized {
+                    CameraPreviewView(session: scanner.session)
+                        .ignoresSafeArea()
+                } else {
+                    Color.black.ignoresSafeArea()
+                    ContentUnavailableView(
+                        &quot;Camera access needed&quot;,
+                        systemImage: &quot;camera&quot;,
+                        description: Text(&quot;Enable camera access in Settings to use continuous aerial scanning.&quot;)
+                    )
+                    .foregroundStyle(.white)
+                }
+
+                VStack {
+                    statusBanner
+                    Spacer()
+                    controls
+                }
+                .padding()
+            }
+            .navigationTitle(&quot;Aerial Scan&quot;)
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                location.requestPermission()
+                requestCameraAccessIfNeeded()
+                scanner.currentCoordinateProvider = { location.currentLocation }
+                scanner.onAutoDetectDeadTree = { classification, snapshot in
+                    autoLog(classification: classification, snapshot: snapshot)
+                }
+            }
+            .onDisappear { scanner.stop() }
+        }
+    }
+
+    private var statusBanner: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Circle()
+                    .fill(bannerColor)
+                    .frame(width: 12, height: 12)
+                Text(bannerText)
+                    .font(.subheadline.bold())
+                    .lineLimit(1)
+                Spacer()
+                Text(&quot;Logged: \(loggedThisSessionCount)&quot;)
+                    .font(.caption)
+            }
+            // Live readout of the current frame&#x27;s signals, useful for tuning
+            // the thresholds in TreeHealthVisionAnalyzer.swift against real
+            // healthy/dead trees - point at a known-healthy tree and a
+            // known-dead one and see what numbers come back.
+            if scanner.vegetationPresent, scanner.hasDistinctSubject, let result = scanner.latestClassification {
+                Text(&quot;Combined: \(Int(result.deadCanopyFraction * 100))%  ·  color: \(Int(result.colorDeadFraction * 100))%  ·  porosity: \(Int(result.porosityFraction * 100))%&quot;)
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+        }
+        .padding(10)
+        .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 12))
+        .foregroundStyle(.white)
+    }
+
+    private var bannerColor: Color {
+        guard scanner.isRunning else { return .gray }
+        guard scanner.vegetationPresent, scanner.hasDistinctSubject else { return .gray }
+        switch scanner.latestClassification?.status {
+        case .dead: return .red
+        case .alive: return .green
+        default: return .orange
+        }
+    }
+
+    private var bannerText: String {
+        guard scanner.isRunning else { return &quot;Scanning paused&quot; }
+        guard scanner.vegetationPresent else { return &quot;No canopy in view&quot; }
+        guard scanner.hasDistinctSubject else { return &quot;No distinct subject to score&quot; }
+        guard let result = scanner.latestClassification else { return &quot;Analyzing...&quot; }
+        switch result.status {
+        case .dead: return &quot;Dead canopy in frame (\(scanner.consecutiveDeadFrames)/3 to confirm)&quot;
+        case .alive: return &quot;Healthy canopy&quot;
+        case .uncertain: return &quot;Uncertain&quot;
+        }
+    }
+
+    private var controls: some View {
+        VStack(spacing: 8) {
+            if let message = lastLogMessage {
+                Text(message)
+                    .font(.caption)
+                    .padding(8)
+                    .background(.black.opacity(0.55), in: Capsule())
+                    .foregroundStyle(.white)
+            }
+            Button(scanner.isRunning ? &quot;Stop Scanning&quot; : &quot;Start Scanning&quot;) {
+                if scanner.isRunning {
+                    scanner.stop()
+                } else {
+                    scanner.configureAndStart()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(scanner.isRunning ? .red : .green)
+            .disabled(!cameraAuthorized)
+        }
+    }
+
+    private func requestCameraAccessIfNeeded() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            cameraAuthorized = true
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async { cameraAuthorized = granted }
+            }
+        default:
+            cameraAuthorized = false
+        }
+    }
+
+    private func autoLog(classification: AerialClassification, snapshot: UIImage?) {
+        let coordinate = location.currentLocation
+        let record = TreeRecord(
+            timestamp: .now,
+            latitude: coordinate?.latitude ?? 0,
+            longitude: coordinate?.longitude ?? 0,
+            source: .aerial,
+            status: classification.status,
+            confidence: classification.confidence,
+            notes: &quot;Auto-logged during live scan, dead canopy fraction \(Int(classification.deadCanopyFraction * 100))%&quot;
+        )
+        if let snapshot, let fileName = PhotoStore.save(image: snapshot) {
+            record.photoFileName = fileName
+        }
+        modelContext.insert(record)
+        loggedThisSessionCount += 1
+
+        if let coordinate {
+            lastLogMessage = String(format: &quot;Logged dead tree at %.5f, %.5f&quot;, coordinate.latitude, coordinate.longitude)
+        } else {
+            lastLogMessage = &quot;Logged dead tree (no GPS fix yet)&quot;
+        }
+    }
+}
+
+#Preview {
+    AerialScanView()
+        .modelContainer(for: TreeRecord.self, inMemory: true)
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">CameraPreviewView.swift</span><span class="flabel">Camera preview layer</span></summary>
+        <pre><code class="language-swift">import SwiftUI
+import AVFoundation
+
+/// Shows the live camera feed from a running AVCaptureSession full-screen.
+/// SwiftUI has no built-in camera preview, so this wraps the UIKit layer.
+struct CameraPreviewView: UIViewRepresentable {
+    let session: AVCaptureSession
+
+    func makeUIView(context: Context) -&gt; PreviewContainerView {
+        let view = PreviewContainerView()
+        view.videoPreviewLayer.session = session
+        view.videoPreviewLayer.videoGravity = .resizeAspectFill
+        return view
+    }
+
+    func updateUIView(_ uiView: PreviewContainerView, context: Context) {}
+
+    final class PreviewContainerView: UIView {
+        override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+
+        var videoPreviewLayer: AVCaptureVideoPreviewLayer {
+            // swiftlint:disable:next force_cast
+            layer as! AVCaptureVideoPreviewLayer
+        }
+    }
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">TreeMapView.swift</span><span class="flabel">Map tab UI</span></summary>
+        <pre><code class="language-swift">import SwiftUI
+import SwiftData
+import MapKit
+
+struct TreeMapView: View {
+    @Query(sort: \TreeRecord.timestamp, order: .reverse) private var records: [TreeRecord]
+    @State private var cameraPosition: MapCameraPosition = .automatic
+
+    var body: some View {
+        NavigationStack {
+            Map(position: $cameraPosition) {
+                ForEach(records) { record in
+                    Marker(label(for: record), coordinate: record.coordinate)
+                        .tint(color(for: record.status))
+                }
+            }
+            .navigationTitle(&quot;Tree Map&quot;)
+            .overlay(alignment: .bottom) {
+                if records.isEmpty {
+                    Text(&quot;No trees logged yet&quot;)
+                        .font(.footnote)
+                        .padding(8)
+                        .background(.regularMaterial, in: Capsule())
+                        .padding(.bottom, 12)
+                }
+            }
+        }
+    }
+
+    private func label(for record: TreeRecord) -&gt; String {
+        switch record.status {
+        case .dead: return &quot;Dead&quot;
+        case .alive: return &quot;Alive&quot;
+        case .uncertain: return &quot;Uncertain&quot;
+        }
+    }
+
+    private func color(for status: TreeHealthStatus) -&gt; Color {
+        switch status {
+        case .dead: return .red
+        case .alive: return .green
+        case .uncertain: return .orange
+        }
+    }
+}
+
+#Preview {
+    TreeMapView()
+        .modelContainer(for: TreeRecord.self, inMemory: true)
+}
+</code></pre>
+      </details>
+      <details class="code-file">
+        <summary><span class="fname">TreeListView.swift</span><span class="flabel">Log tab UI</span></summary>
+        <pre><code class="language-swift">import SwiftUI
+import SwiftData
+
+struct TreeListView: View {
+    @Query(sort: \TreeRecord.timestamp, order: .reverse) private var records: [TreeRecord]
+    @Environment(\.modelContext) private var modelContext
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(records) { record in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Circle().fill(color(for: record.status)).frame(width: 10, height: 10)
+                            Text(record.status.rawValue.capitalized).bold()
+                            Spacer()
+                            Text(record.source.rawValue.capitalized)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(String(format: &quot;%.5f, %.5f&quot;, record.latitude, record.longitude))
+                            .font(.caption)
+                        Text(record.timestamp.formatted(date: .abbreviated, time: .shortened))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        if let velocity = record.sonicVelocity {
+                            Text(&quot;Sonic velocity: \(Int(velocity)) m/s&quot;)
+                                .font(.caption2)
+                        }
+                        if let confidence = record.confidence {
+                            Text(&quot;Confidence: \(Int(confidence * 100))%&quot;)
+                                .font(.caption2)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+                .onDelete(perform: delete)
+            }
+            .navigationTitle(&quot;Logged Trees (\(records.count))&quot;)
+            .toolbar { EditButton() }
+            .overlay {
+                if records.isEmpty {
+                    ContentUnavailableView(&quot;No trees logged yet&quot;, systemImage: &quot;tree&quot;)
+                }
+            }
+        }
+    }
+
+    private func delete(at offsets: IndexSet) {
+        for index in offsets {
+            modelContext.delete(records[index])
+        }
+    }
+
+    private func color(for status: TreeHealthStatus) -&gt; Color {
+        switch status {
+        case .dead: return .red
+        case .alive: return .green
+        case .uncertain: return .orange
+        }
+    }
+}
+
+#Preview {
+    TreeListView()
+        .modelContainer(for: TreeRecord.self, inMemory: true)
+}
+</code></pre>
+      </details>
+
+    <div class="subhead">ESP32 sensor (Arduino / C++)</div>
+      <details class="code-file">
+        <summary><span class="fname">DeadTreeSensor.ino</span><span class="flabel">ESP32 sonic sensor + BLE server</span></summary>
+        <pre><code class="language-cpp">
+#include &lt;BLEDevice.h&gt;
+#include &lt;BLEServer.h&gt;
+#include &lt;BLEUtils.h&gt;
+#include &lt;BLE2902.h&gt;
+
+// ---- Pin configuration ----
+static const int PIEZO_TX_PIN      = 25;  
+static const int PIEZO_RX_PIN      = 34;  
+static const int STATUS_LED_PIN    = 2;  
+
+// ---- Sensor calibration (TUNE THESE FOR YOUR SENSORS/SPECIES) ----
+static const float TRUNK_DISTANCE_CM         = 30.0;   
+static const float DEAD_VELOCITY_THRESHOLD_MS = 1000.0; 
+static const float UNCERTAIN_BAND_MS          = 200.0;  
+static const int   RX_TRIGGER_LEVEL           = 600;    
+static const unsigned long TIMEOUT_US         = 20000;  
+
+// ---- BLE UUIDs ----
+#define SERVICE_UUID       &quot;A1B2C3D4-0001-1000-8000-00805F9B34FB&quot;
+#define READING_CHAR_UUID  &quot;A1B2C3D4-0002-1000-8000-00805F9B34FB&quot;
+#define COMMAND_CHAR_UUID  &quot;A1B2C3D4-0003-1000-8000-00805F9B34FB&quot;
+
+BLECharacteristic *readingCharacteristic;
+BLECharacteristic *commandCharacteristic;
+bool deviceConnected = false;
+
+void takeReadingAndNotify();
+
+class ServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer *server) override {
+    deviceConnected = true;
+  }
+  void onDisconnect(BLEServer *server) override {
+    deviceConnected = false;
+    BLEDevice::startAdvertising(); // resume advertising so the phone can reconnect
+  }
+};
+
+class CommandCallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *characteristic) override {
+    String value = characteristic-&gt;getValue().c_str();
+    if (value == &quot;PULSE&quot;) {
+      takeReadingAndNotify();
+    }
+  }
+};
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(PIEZO_TX_PIN, OUTPUT);
+  pinMode(STATUS_LED_PIN, OUTPUT);
+  analogReadResolution(12);
+
+  BLEDevice::init(&quot;DeadTreeSensor&quot;);
+  BLEServer *server = BLEDevice::createServer();
+  server-&gt;setCallbacks(new ServerCallbacks());
+
+  BLEService *service = server-&gt;createService(SERVICE_UUID);
+
+  readingCharacteristic = service-&gt;createCharacteristic(
+    READING_CHAR_UUID,
+    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY
+  );
+  readingCharacteristic-&gt;addDescriptor(new BLE2902());
+
+  commandCharacteristic = service-&gt;createCharacteristic(
+    COMMAND_CHAR_UUID,
+    BLECharacteristic::PROPERTY_WRITE
+  );
+  commandCharacteristic-&gt;setCallbacks(new CommandCallbacks());
+
+  service-&gt;start();
+
+  BLEAdvertising *advertising = BLEDevice::getAdvertising();
+  advertising-&gt;addServiceUUID(SERVICE_UUID);
+  advertising-&gt;setScanResponse(true);
+  BLEDevice::startAdvertising();
+
+  Serial.println(&quot;DeadTreeSensor BLE advertising started.&quot;);
+}
+
+void loop() { }
+
+void takeReadingAndNotify() {
+  digitalWrite(STATUS_LED_PIN, HIGH);
+
+
+  for (int i = 0; i &lt; 8; i++) {
+    digitalWrite(PIEZO_TX_PIN, HIGH);
+    delayMicroseconds(125);
+    digitalWrite(PIEZO_TX_PIN, LOW);
+    delayMicroseconds(125);
+  }
+
+  unsigned long startTime = micros();
+  unsigned long elapsed = 0;
+  int peakAmplitude = 0;
+  bool detected = false;
+
+  while (elapsed &lt; TIMEOUT_US) {
+    int reading = analogRead(PIEZO_RX_PIN);
+    if (reading &gt; peakAmplitude) peakAmplitude = reading;
+    if (reading &gt;= RX_TRIGGER_LEVEL) {
+      detected = true;
+      break;
+    }
+    elapsed = micros() - startTime;
+  }
+
+  float velocity;
+  int status; // 0 alive, 1 dead, 2 uncertain
+
+  if (!detected) {
+   
+    velocity = 0;
+    status = 2;
+  } else {
+    float seconds = elapsed / 1000000.0;
+    float meters = TRUNK_DISTANCE_CM / 100.0;
+    velocity = meters / seconds;
+
+    if (velocity &lt; DEAD_VELOCITY_THRESHOLD_MS - UNCERTAIN_BAND_MS) {
+      status = 1; // dead
+    } else if (velocity &gt; DEAD_VELOCITY_THRESHOLD_MS + UNCERTAIN_BAND_MS) {
+      status = 0; // alive
+    } else {
+      status = 2; // uncertain, too close to the threshold to call confidently
+    }
+  }
+
+  char payload[96];
+  snprintf(payload, sizeof(payload), &quot;{\&quot;v\&quot;:%.1f,\&quot;amp\&quot;:%d,\&quot;status\&quot;:%d}&quot;,
+           velocity, peakAmplitude, status);
+
+  readingCharacteristic-&gt;setValue(payload);
+  readingCharacteristic-&gt;notify();
+
+  Serial.println(payload);
+  digitalWrite(STATUS_LED_PIN, LOW);
+}
+</code></pre>
+      </details>
+
+  </section>
+
+</main>
+
+<footer>
+  TreeCare &mdash; a student project combining an iPhone app, a DIY ESP32 sonic sensor, and on-device computer vision.
+</footer>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script>hljs.highlightAll();</script>
+</body>
+</html>
